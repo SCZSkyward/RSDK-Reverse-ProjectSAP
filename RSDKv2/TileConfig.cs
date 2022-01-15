@@ -42,7 +42,7 @@
             /// <summary>
             /// Angle value when walking on LWall
             /// </summary>
-            public byte lWallAngle = 0x40;
+            public byte lWallAngle = 0xC0;
             /// <summary>
             /// Angle value when walking on the ceiling
             /// </summary>
@@ -50,7 +50,7 @@
             /// <summary>
             /// Angle value when walking on RWall
             /// </summary>
-            public byte rWallAngle = 0xC0;
+            public byte rWallAngle = 0x40;
 
             public CollisionMask()
             {
@@ -71,8 +71,8 @@
                 flipY = (flags >> 4) != 0;
                 this.flags = (byte)(flags & 0xF);
                 floorAngle = reader.ReadByte();
-                rWallAngle = reader.ReadByte();
                 lWallAngle = reader.ReadByte();
+                rWallAngle = reader.ReadByte();
                 roofAngle = reader.ReadByte();
 
                 byte[] collision = reader.readBytes(8);
@@ -94,8 +94,8 @@
             {
                 writer.Write(addNibbles(flipY ? (byte)1 : (byte)0, flags));
                 writer.Write(floorAngle);
-                writer.Write(rWallAngle);
                 writer.Write(lWallAngle);
+                writer.Write(rWallAngle);
                 writer.Write(roofAngle);
 
                 byte[] collision = new byte[8];
