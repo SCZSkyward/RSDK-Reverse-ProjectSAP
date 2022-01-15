@@ -353,68 +353,31 @@ namespace RSDKv4
     {
         public new class Entity : RSDKv3_4.Scene.Entity
         {
-            public class VariableInfo
-            {
-                public VariableInfo() { }
+            public enum InkEffects { None, Blend, Alpha, Add, Sub }
 
-                /// <summary>
-                /// the variable's value
-                /// </summary>
-                public int value = 0;
-                /// <summary>
-                /// determines if the variable is active or not
-                /// </summary>
-                public bool active = false;
-            };
+            public enum Priorities { ActiveBounds, Active, ActivePaused, XBounds, XBoundsDestroy, Inactive, BoundsSmall, Unknown }
 
-            public static List<string> variableNames = new List<string>() {
-                "State",
-                "Direction",
-                "Scale",
-                "Rotation",
-                "DrawOrder",
-                "Priority",
-                "Alpha",
-                "Animation",
-                "AnimationSpeed",
-                "Frame",
-                "InkEffect",
-                "Value0",
-                "Value1",
-                "Value2",
-                "Value3"
-            };
-
-            public static List<string> variableTypes = new List<string>()  {
-                "int",
-                "uint8",
-                "int",
-                "int",
-                "uint8",
-                "uint8",
-                "uint8",
-                "uint8",
-                "int",
-                "uint8",
-                "uint8",
-                "int",
-                "int",
-                "int",
-                "int"
-            };
-
-            /// <summary>
-            /// info for all the entity's variables 
-            /// </summary>
-            public VariableInfo[] variables = new VariableInfo[15];
+            public int? State;
+            public Tiles128x128.Block.Tile.Directions? Direction;
+            public int? Scale;
+            public int? Rotation;
+            public byte? DrawOrder;
+            public Priorities? Priority;
+            public byte? Alpha;
+            public byte? Animation;
+            public int? AnimationSpeed;
+            public byte? Frame;
+            public InkEffects? InkEffect;
+            public int? Value0;
+            public int? Value1;
+            public int? Value2;
+            public int? Value3;
 
             public Entity()
             {
-                for (int v = 0; v < 15; ++v)
-                    variables[v] = new VariableInfo();
             }
 
-            public Entity(byte type, byte propertyValue, int xpos, int ypos) : this()
+            public Entity(byte type, byte propertyValue, int xpos, int ypos)
             {
                 this.type = type;
                 this.propertyValue = propertyValue;
@@ -422,7 +385,7 @@ namespace RSDKv4
                 this.ypos = ypos;
             }
 
-            public Entity(Reader reader) : this()
+            public Entity(Reader reader)
             {
                 read(reader);
             }
@@ -431,8 +394,6 @@ namespace RSDKv4
             {
                 //Variable flags, 2 bytes, unsigned
                 ushort flags = reader.ReadUInt16();
-                for (int i = 0; i < 15; i++)
-                    variables[i].active = (flags & (1 << i)) != 0;
 
                 // entity type, 1 byte, unsigned
                 type = reader.ReadByte();
@@ -444,28 +405,101 @@ namespace RSDKv4
                 xpos = reader.ReadInt32();
                 ypos = reader.ReadInt32();
 
-                for (int i = 0; i < 15; i++)
-                {
-                    if (variables[i].active)
-                    {
-                        if (variableTypes[i] == "uint8")
-                            variables[i].value = reader.ReadByte();
-                        else
-                            variables[i].value = reader.ReadInt32();
-                    }
-                }
+                if ((flags & 1) != 0)
+                    State = reader.ReadInt32();
+                else
+                    State = null;
+                if ((flags & 2) != 0)
+                    Direction = (Tiles128x128.Block.Tile.Directions)reader.ReadByte();
+                else
+                    Direction = null;
+                if ((flags & 4) != 0)
+                    Scale = reader.ReadInt32();
+                else
+                    Scale = null;
+                if ((flags & 8) != 0)
+                    Rotation = reader.ReadInt32();
+                else
+                    Rotation = null;
+                if ((flags & 16) != 0)
+                    DrawOrder = reader.ReadByte();
+                else
+                    DrawOrder = null;
+                if ((flags & 32) != 0)
+                    Priority = (Priorities)reader.ReadByte();
+                else
+                    Priority = null;
+                if ((flags & 64) != 0)
+                    Alpha = reader.ReadByte();
+                else
+                    Alpha = null;
+                if ((flags & 128) != 0)
+                    Animation = reader.ReadByte();
+                else
+                    Animation = null;
+                if ((flags & 256) != 0)
+                    AnimationSpeed = reader.ReadInt32();
+                else
+                    AnimationSpeed = null;
+                if ((flags & 512) != 0)
+                    Frame = reader.ReadByte();
+                else
+                    Frame = null;
+                if ((flags & 1024) != 0)
+                    InkEffect = (InkEffects)reader.ReadByte();
+                else
+                    InkEffect = null;
+                if ((flags & 2048) != 0)
+                    Value0 = reader.ReadInt32();
+                else
+                    Value0 = null;
+                if ((flags & 4096) != 0)
+                    Value1 = reader.ReadInt32();
+                else
+                    Value1 = null;
+                if ((flags & 8192) != 0)
+                    Value2 = reader.ReadInt32();
+                else
+                    Value2 = null;
+                if ((flags & 16384) != 0)
+                    Value3 = reader.ReadInt32();
+                else
+                    Value3 = null;
             }
 
             public override void write(Writer writer)
             {
                 int flags = 0;
-                for (int i = 0; i < 15; i++)
-                {
-                    if (variables[i].active)
-                        flags |= 1 << i;
-                    else
-                        flags &= ~(1 << i);
-                }
+                if (State.HasValue)
+                    flags |= 1;
+                if (Direction.HasValue)
+                    flags |= 2;
+                if (Scale.HasValue)
+                    flags |= 4;
+                if (Rotation.HasValue)
+                    flags |= 8;
+                if (DrawOrder.HasValue)
+                    flags |= 16;
+                if (Priority.HasValue)
+                    flags |= 32;
+                if (Alpha.HasValue)
+                    flags |= 64;
+                if (Animation.HasValue)
+                    flags |= 128;
+                if (AnimationSpeed.HasValue)
+                    flags |= 256;
+                if (Frame.HasValue)
+                    flags |= 512;
+                if (InkEffect.HasValue)
+                    flags |= 1024;
+                if (Value0.HasValue)
+                    flags |= 2048;
+                if (Value1.HasValue)
+                    flags |= 4096;
+                if (Value2.HasValue)
+                    flags |= 8192;
+                if (Value3.HasValue)
+                    flags |= 16384;
                 writer.Write((ushort)flags);
 
                 writer.Write(type);
@@ -474,16 +508,36 @@ namespace RSDKv4
                 writer.Write(xpos);
                 writer.Write(ypos);
 
-                for (int i = 0; i < 15; i++)
-                {
-                    if (variables[i].active)
-                    {
-                        if (variableTypes[i] == "uint8")
-                            writer.Write((byte)variables[i].value);
-                        else
-                            writer.Write(variables[i].value);
-                    }
-                }
+                if (State.HasValue)
+                    writer.Write(State.Value);
+                if (Direction.HasValue)
+                    writer.Write((byte)Direction.Value);
+                if (Scale.HasValue)
+                    writer.Write(Scale.Value);
+                if (Rotation.HasValue)
+                    writer.Write(Rotation.Value);
+                if (DrawOrder.HasValue)
+                    writer.Write(DrawOrder.Value);
+                if (Priority.HasValue)
+                    writer.Write((byte)Priority.Value);
+                if (Alpha.HasValue)
+                    writer.Write(Alpha.Value);
+                if (Animation.HasValue)
+                    writer.Write(Animation.Value);
+                if (AnimationSpeed.HasValue)
+                    writer.Write(AnimationSpeed.Value);
+                if (Frame.HasValue)
+                    writer.Write(Frame.Value);
+                if (InkEffect.HasValue)
+                    writer.Write((byte)InkEffect.Value);
+                if (Value0.HasValue)
+                    writer.Write(Value0.Value);
+                if (Value1.HasValue)
+                    writer.Write(Value1.Value);
+                if (Value2.HasValue)
+                    writer.Write(Value2.Value);
+                if (Value3.HasValue)
+                    writer.Write(Value3.Value);
             }
 
         }
