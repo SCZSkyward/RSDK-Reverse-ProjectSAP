@@ -367,7 +367,7 @@ namespace RSDKv4
                 public bool active = false;
             };
 
-            static List<string> variableNames = new List<string>() {
+            public static List<string> variableNames = new List<string>() {
                 "State",
                 "Direction",
                 "Scale",
@@ -385,7 +385,7 @@ namespace RSDKv4
                 "Value3"
             };
 
-            static List<string> variableTypes = new List<string>()  {
+            public static List<string> variableTypes = new List<string>()  {
                 "int",
                 "uint8",
                 "int",
