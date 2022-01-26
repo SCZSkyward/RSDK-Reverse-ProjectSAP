@@ -2,8 +2,10 @@
 {
     public class Tiles128x128
     {
+        [System.Serializable]
         public class Block
         {
+            [System.Serializable]
             public class Tile
             {
                 public enum VisualPlanes

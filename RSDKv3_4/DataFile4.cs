@@ -171,7 +171,7 @@ namespace RSDKv4
                 reader.BaseStream.Position = fileOffset;
 
                 // Decrypt File if Encrypted
-                if (encrypted && !fileName.usingHash)
+                if (encrypted)
                     fileData = decrypt(reader.readBytes(fileSize), false);
                 else
                     fileData = reader.readBytes(fileSize);
@@ -227,7 +227,7 @@ namespace RSDKv4
 
             public void writeFileData(Writer writer)
             {
-                if (encrypted && !fileName.usingHash)
+                if (encrypted)
                     writer.Write(decrypt(fileData, true));
                 else
                     writer.Write(fileData);
@@ -467,9 +467,9 @@ namespace RSDKv4
         private byte[] GetHash(string str)
         {
             byte[] hash;
-            using (System.Security.Cryptography.MD5 md5 = System.Security.Cryptography.MD5.Create())
+            using (MD5 md5 = MD5.Create())
             {
-                hash = md5.ComputeHash(new System.Text.ASCIIEncoding().GetBytes(str));
+                hash = md5.ComputeHash(new ASCIIEncoding().GetBytes(str.ToLowerInvariant()));
             }
             return hash;
         }

@@ -7,6 +7,7 @@ namespace RSDKv3_4
 {
     public abstract class Scene
     {
+        [System.Serializable]
         public abstract class Entity
         {
             /// <summary>
@@ -182,6 +183,7 @@ namespace RSDKv3
 {
     public class Scene : RSDKv3_4.Scene
     {
+        [System.Serializable]
         public new class Entity : RSDKv3_4.Scene.Entity
         {
             public Entity() { }
@@ -351,6 +353,7 @@ namespace RSDKv4
 {
     public class Scene : RSDKv3_4.Scene
     {
+        [System.Serializable]
         public new class Entity : RSDKv3_4.Scene.Entity
         {
             public enum InkEffects { None, Blend, Alpha, Add, Sub }

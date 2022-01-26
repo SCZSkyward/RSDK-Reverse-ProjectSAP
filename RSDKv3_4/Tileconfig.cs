@@ -12,8 +12,10 @@
         /// </summary>
         public CollisionMask[][] collisionMasks = new CollisionMask[2][];
 
+        [System.Serializable]
         public class CollisionMask
         {
+            [System.Serializable]
             public class HeightMask
             {
                 public HeightMask() { }
