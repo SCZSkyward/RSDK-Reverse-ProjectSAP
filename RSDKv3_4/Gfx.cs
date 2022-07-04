@@ -9,10 +9,12 @@ namespace RSDKv3
         /// the width of the image
         /// </summary>
         public ushort width = 0;
+
         /// <summary>
         /// the height of the image
         /// </summary>
         public ushort height = 0;
+
         /// <summary>
         /// the Image's palette
         /// </summary>
@@ -34,10 +36,10 @@ namespace RSDKv3
 
         public Gfx(Reader reader, bool dcVer = false) : this()
         {
-            read(reader, dcVer);
+            Read(reader, dcVer);
         }
 
-        public void read(Reader reader, bool dcVer = false)
+        public void Read(Reader reader, bool dcVer = false)
         {
             if (dcVer)
                 reader.ReadByte();
@@ -49,11 +51,11 @@ namespace RSDKv3
             height |= reader.ReadByte();
 
             // Read & Process palette
-            for (int i = 0; i < 255; i++)
+            for (int c = 0; c < 255; c++)
             {
-                palette[i].R = reader.ReadByte();
-                palette[i].G = reader.ReadByte();
-                palette[i].B = reader.ReadByte();
+                palette[c].r = reader.ReadByte();
+                palette[c].g = reader.ReadByte();
+                palette[c].b = reader.ReadByte();
             }
 
             // Read Pixels
@@ -86,19 +88,19 @@ namespace RSDKv3
             reader.Close();
         }
 
-        public void write(string filename, bool dcVer = false)
+        public void Write(string filename, bool dcVer = false)
         {
             using (Writer writer = new Writer(filename))
-                write(writer, dcVer);
+                Write(writer, dcVer);
         }
 
-        public void write(System.IO.Stream stream, bool dcVer = false)
+        public void Write(System.IO.Stream stream, bool dcVer = false)
         {
             using (Writer writer = new Writer(stream))
-                write(writer, dcVer);
+                Write(writer, dcVer);
         }
 
-        public void write(Writer writer, bool dcVer = false)
+        public void Write(Writer writer, bool dcVer = false)
         {
             if (dcVer)
                 writer.Write((byte)0);
@@ -111,11 +113,11 @@ namespace RSDKv3
             writer.Write((byte)(height & 0xff));
 
             // Output palette
-            for (int x = 0; x < 0xFF; x++)
+            for (int c = 0; c < 0xFF; c++)
             {
-                writer.Write(palette[x].R);
-                writer.Write(palette[x].G);
-                writer.Write(palette[x].B);
+                writer.Write(palette[c].r);
+                writer.Write(palette[c].g);
+                writer.Write(palette[c].b);
             }
 
             // Output data
@@ -126,14 +128,14 @@ namespace RSDKv3
             {
                 if (pixels[x] != p && x > 0)
                 {
-                    rle_write(writer, p, cnt, dcVer);
+                    WriteRLE(writer, p, cnt, dcVer);
                     cnt = 0;
                 }
                 p = pixels[x];
                 cnt++;
             }
 
-            rle_write(writer, p, cnt, dcVer);
+            WriteRLE(writer, p, cnt, dcVer);
 
             // End of GFX file		
             writer.Write((byte)0xFF);
@@ -142,7 +144,7 @@ namespace RSDKv3
             writer.Close();
         }
 
-        private static void rle_write(Writer file, int pixel, int count, bool dcVer = false)
+        private static void WriteRLE(Writer file, int pixel, int count, bool dcVer = false)
         {
             if (count <= 2)
             {
@@ -171,7 +173,7 @@ namespace RSDKv3
             }
         }
 
-        public System.Drawing.Image toImage()
+        public System.Drawing.Image ToImage()
         {
             // Create image
             System.Drawing.Bitmap img = new System.Drawing.Bitmap(width, height, System.Drawing.Imaging.PixelFormat.Format8bppIndexed);
@@ -179,7 +181,7 @@ namespace RSDKv3
             System.Drawing.Imaging.ColorPalette cpal = img.Palette;
 
             for (int i = 0; i < 0xFF; i++)
-                cpal.Entries[i] = System.Drawing.Color.FromArgb(255, palette[i].R, palette[i].G, palette[i].B);
+                cpal.Entries[i] = System.Drawing.Color.FromArgb(255, palette[i].r, palette[i].g, palette[i].b);
 
             img.Palette = cpal;
 
@@ -191,22 +193,22 @@ namespace RSDKv3
             return img;
         }
 
-        public Bitmap toBitmap()
+        public Bitmap ToBitmap()
         {
             // Create image
             Bitmap img = new Bitmap();
             img.width = width;
             img.height = height;
 
-            for (int i = 0; i < 0xFF; i++)
+            for (int c = 0; c < 0xFF; c++)
             {
-                img.palette[i].R = palette[i].R;
-                img.palette[i].G = palette[i].G;
-                img.palette[i].B = palette[i].B;
+                img.palette[c].r = palette[c].r;
+                img.palette[c].g = palette[c].g;
+                img.palette[c].b = palette[c].b;
             }
-            img.palette[0xFF].R = 0xFF;
-            img.palette[0xFF].G = 0x00;
-            img.palette[0xFF].B = 0xFF;
+            img.palette[0xFF].r = 0xFF;
+            img.palette[0xFF].g = 0x00;
+            img.palette[0xFF].b = 0xFF;
 
             img.pixels = new byte[width * height];
             Array.Copy(pixels, img.pixels, pixels.Length);
@@ -214,22 +216,22 @@ namespace RSDKv3
             return img;
         }
 
-        public Gif toGif()
+        public Gif ToGif()
         {
             // Create image
             Gif img = new Gif();
             img.width = width;
             img.height = height;
 
-            for (int i = 0; i < 0xFF; i++)
+            for (int c = 0; c < 0xFF; c++)
             {
-                img.palette[i].R = palette[i].R;
-                img.palette[i].G = palette[i].G;
-                img.palette[i].B = palette[i].B;
+                img.palette[c].r = palette[c].r;
+                img.palette[c].g = palette[c].g;
+                img.palette[c].b = palette[c].b;
             }
-            img.palette[0xFF].R = 0xFF;
-            img.palette[0xFF].G = 0x00;
-            img.palette[0xFF].B = 0xFF;
+            img.palette[0xFF].r = 0xFF;
+            img.palette[0xFF].g = 0x00;
+            img.palette[0xFF].b = 0xFF;
 
             img.pixels = new byte[width * height];
             Array.Copy(pixels, img.pixels, pixels.Length);
@@ -237,17 +239,17 @@ namespace RSDKv3
             return img;
         }
 
-        public void fromImage(System.Drawing.Bitmap img)
+        public void FromImage(System.Drawing.Bitmap img)
         {
             // Create image
             width = (ushort)img.Width;
             height = (ushort)img.Height;
 
-            for (int i = 0; i < 0xFF; i++)
+            for (int c = 0; c < 0xFF; c++)
             {
-                palette[i].R = img.Palette.Entries[i].R;
-                palette[i].G = img.Palette.Entries[i].G;
-                palette[i].B = img.Palette.Entries[i].B;
+                palette[c].r = img.Palette.Entries[c].R;
+                palette[c].g = img.Palette.Entries[c].G;
+                palette[c].b = img.Palette.Entries[c].B;
             }
             pixels = new byte[width * height];
 
@@ -255,17 +257,17 @@ namespace RSDKv3
             System.Runtime.InteropServices.Marshal.Copy(imgData.Scan0, pixels, 0, pixels.Length);
         }
 
-        public void fromImage(Bitmap img)
+        public void FromImage(Bitmap img)
         {
             // Create image
             width = (ushort)img.width;
             height = (ushort)img.height;
 
-            for (int i = 0; i < 0xFF; i++)
+            for (int c = 0; c < 0xFF; c++)
             {
-                palette[i].R = img.palette[i].R;
-                palette[i].G = img.palette[i].G;
-                palette[i].B = img.palette[i].B;
+                palette[c].r = img.palette[c].r;
+                palette[c].g = img.palette[c].g;
+                palette[c].b = img.palette[c].b;
             }
 
             pixels = new byte[width * height];
@@ -278,11 +280,11 @@ namespace RSDKv3
             width = img.width;
             height = img.height;
 
-            for (int i = 0; i < 0xFF; i++)
+            for (int c = 0; c < 0xFF; c++)
             {
-                palette[i].R = img.palette[i].R;
-                palette[i].G = img.palette[i].G;
-                palette[i].B = img.palette[i].B;
+                palette[c].r = img.palette[c].r;
+                palette[c].g = img.palette[c].g;
+                palette[c].b = img.palette[c].b;
             }
 
             pixels = new byte[width * height];

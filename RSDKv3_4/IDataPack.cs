@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace RSDKv3_4
 {
-    public interface IDataFile
+    public interface IDataPack
     {
         bool FileExists(string fileName);
 

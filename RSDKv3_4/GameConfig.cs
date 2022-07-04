@@ -19,14 +19,17 @@ namespace RSDKv3_4
                 /// the stage name (shows up on the dev menu)
                 /// </summary>
                 public string name = "STAGE";
+
                 /// <summary>
                 /// the folder of the stage
                 /// </summary>
                 public string folder = "Folder";
+
                 /// <summary>
-                /// the stage's identifier (E.G Act1 or Act2)
+                /// the stage's identifier (E.G Act'1' or Act'2')
                 /// </summary>
                 public string actID = "1";
+
                 /// <summary>
                 /// Determines if the stage is highlighted on the dev menu
                 /// </summary>
@@ -36,22 +39,22 @@ namespace RSDKv3_4
 
                 public StageInfo(Reader reader)
                 {
-                    read(reader);
+                    Read(reader);
                 }
 
-                public void read(Reader reader)
+                public void Read(Reader reader)
                 {
-                    folder = reader.readRSDKString();
-                    actID = reader.readRSDKString();
-                    name = reader.readRSDKString();
+                    folder = reader.ReadStringRSDK();
+                    actID = reader.ReadStringRSDK();
+                    name = reader.ReadStringRSDK();
                     highlighted = reader.ReadBoolean();
                 }
 
-                public void write(Writer writer)
+                public void Write(Writer writer)
                 {
-                    writer.writeRSDKString(folder);
-                    writer.writeRSDKString(actID);
-                    writer.writeRSDKString(name);
+                    writer.WriteStringRSDK(folder);
+                    writer.WriteStringRSDK(actID);
+                    writer.WriteStringRSDK(name);
                     writer.Write(highlighted);
                 }
             }
@@ -60,10 +63,10 @@ namespace RSDKv3_4
 
             public StageList(Reader reader)
             {
-                read(reader);
+                Read(reader);
             }
 
-            public void read(Reader reader)
+            public void Read(Reader reader)
             {
                 list.Clear();
                 byte stageCount = reader.ReadByte();
@@ -71,11 +74,11 @@ namespace RSDKv3_4
                     list.Add(new StageInfo(reader));
             }
 
-            public void write(Writer writer)
+            public void Write(Writer writer)
             {
                 writer.Write((byte)list.Count);
                 foreach (StageInfo stage in list)
-                    stage.write(writer);
+                    stage.Write(writer);
             }
 
         }
@@ -86,14 +89,15 @@ namespace RSDKv3_4
             /// the name of the variable
             /// </summary>
             public string name = "Variable";
+
             /// <summary>
             /// the variable's value
             /// </summary>
             public int value = 0;
 
-            public abstract void read(Reader reader);
+            public abstract void Read(Reader reader);
 
-            public abstract void write(Writer writer);
+            public abstract void Write(Writer writer);
         }
 
         public class ObjectInfo
@@ -130,21 +134,21 @@ namespace RSDKv3_4
         /// </summary>
         public List<StageList> stageLists = new List<StageList>();
 
-        public abstract void read(Reader reader);
+        public abstract void Read(Reader reader);
 
-        public void write(string filename)
+        public void Write(string filename)
         {
             using (Writer writer = new Writer(filename))
-                write(writer);
+                Write(writer);
         }
 
-        public void write(System.IO.Stream stream)
+        public void Write(System.IO.Stream stream)
         {
             using (Writer writer = new Writer(stream))
-                write(writer);
+                Write(writer);
         }
 
-        public abstract void write(Writer writer);
+        public abstract void Write(Writer writer);
 
     }
 }
@@ -165,19 +169,19 @@ namespace RSDKv3
 
             public GlobalVariable(Reader reader)
             {
-                read(reader);
+                Read(reader);
             }
 
-            public override void read(Reader reader)
+            public override void Read(Reader reader)
             {
                 name = reader.ReadString();
-                byte[] bytes = reader.readBytes(4);
+                byte[] bytes = reader.ReadBytes(4);
                 value = (bytes[0] << 24) + (bytes[1] << 16) + (bytes[2] << 8) + (bytes[3] << 0);
             }
 
-            public override void write(Writer writer)
+            public override void Write(Writer writer)
             {
-                writer.writeRSDKString(name);
+                writer.WriteStringRSDK(name);
                 // Value is Big-Endian in RSDKv3
                 byte[] bytes = BitConverter.GetBytes(value);
                 writer.Write(bytes[3]);
@@ -210,15 +214,15 @@ namespace RSDKv3
 
         public GameConfig(Reader reader)
         {
-            read(reader);
+            Read(reader);
         }
 
-        public override void read(Reader reader)
+        public override void Read(Reader reader)
         {
             // General
-            gameTitle = reader.readRSDKString();
-            unknown = reader.readRSDKString();
-            gameDescription = reader.readRSDKString();
+            gameTitle = reader.ReadStringRSDK();
+            unknown = reader.ReadStringRSDK();
+            gameDescription = reader.ReadStringRSDK();
 
             // Objects
             objects.Clear();
@@ -226,13 +230,13 @@ namespace RSDKv3
             for (int i = 0; i < objectCount; ++i)
             {
                 ObjectInfo info = new ObjectInfo();
-                info.name = reader.readRSDKString();
+                info.name = reader.ReadStringRSDK();
 
                 objects.Add(info);
             }
 
             foreach (ObjectInfo info in objects)
-                info.script = reader.readRSDKString();
+                info.script = reader.ReadStringRSDK();
 
             // Global Variables
             globalVariables.Clear();
@@ -244,13 +248,13 @@ namespace RSDKv3
             soundFX.Clear();
             byte sfxCount = reader.ReadByte();
             for (int i = 0; i < sfxCount; ++i)
-                soundFX.Add(reader.readRSDKString());
+                soundFX.Add(reader.ReadStringRSDK());
 
             // Players
             players.Clear();
             byte playerCount = reader.ReadByte();
             for (int i = 0; i < playerCount; i++)
-                players.Add(reader.readRSDKString());
+                players.Add(reader.ReadStringRSDK());
 
             // Stages
             stageLists.Clear();
@@ -262,32 +266,32 @@ namespace RSDKv3
             reader.Close();
         }
 
-        public override void write(Writer writer)
+        public override void Write(Writer writer)
         {
             // General
-            writer.writeRSDKString(gameTitle);
-            writer.writeRSDKString(unknown);
-            writer.writeRSDKString(gameDescription);
+            writer.WriteStringRSDK(gameTitle);
+            writer.WriteStringRSDK(unknown);
+            writer.WriteStringRSDK(gameDescription);
 
             // Objects
             writer.Write((byte)objects.Count);
 
             foreach (ObjectInfo info in objects)
-                writer.writeRSDKString(info.name);
+                writer.WriteStringRSDK(info.name);
 
             foreach (ObjectInfo info in objects)
-                writer.writeRSDKString(info.script);
+                writer.WriteStringRSDK(info.script);
 
             // Global Variables
             writer.Write((byte)globalVariables.Count);
             foreach (GlobalVariable variable in globalVariables)
-                variable.write(writer);
+                variable.Write(writer);
 
             // SoundFX
             writer.Write((byte)soundFX.Count);
 
             foreach (string sfx in soundFX)
-                writer.writeRSDKString(sfx);
+                writer.WriteStringRSDK(sfx);
 
             // Players
             writer.Write((byte)players.Count);
@@ -296,7 +300,7 @@ namespace RSDKv3
 
             // Stages
             for (int s = 0; s < 4; s++)
-                stageLists[s].write(writer);
+                stageLists[s].Write(writer);
 
             writer.Close();
         }
@@ -320,19 +324,19 @@ namespace RSDKv4
 
             public GlobalVariable(Reader reader)
             {
-                read(reader);
+                Read(reader);
             }
 
-            public override void read(Reader reader)
+            public override void Read(Reader reader)
             {
                 name = reader.ReadString();
-                byte[] bytes = reader.readBytes(4);
+                byte[] bytes = reader.ReadBytes(4);
                 value = (bytes[3] << 24) + (bytes[2] << 16) + (bytes[1] << 8) + (bytes[0] << 0);
             }
 
-            public override void write(Writer writer)
+            public override void Write(Writer writer)
             {
-                writer.writeRSDKString(name);
+                writer.WriteStringRSDK(name);
                 // Value is Little-Endian in RSDKv4
                 byte[] bytes = BitConverter.GetBytes(value);
                 writer.Write(bytes[0]);
@@ -351,20 +355,26 @@ namespace RSDKv4
         };
 
         /// <summary>
-        /// a set of colours to be used as the masterpalette
+
+        /// a set of colors to be used as the masterpalette
         /// </summary>
         public Palette masterPalette = new Palette();
+
         /// <summary>
+
         /// the list of global SoundFX
         /// </summary>
         public List<SoundInfo> soundFX = new List<SoundInfo>();
 
+
+
+
         public GameConfig()
         {
-            stageLists.Add(new StageList()); //Presentation Stages
-            stageLists.Add(new StageList()); //Regular Stages
-            stageLists.Add(new StageList()); //Special Stages
-            stageLists.Add(new StageList()); //Bonus Stages
+            stageLists.Add(new StageList()); // Presentation Stages
+            stageLists.Add(new StageList()); // Regular Stages
+            stageLists.Add(new StageList()); // Special Stages
+            stageLists.Add(new StageList()); // Bonus Stages
         }
 
         public GameConfig(string filename) : this(new Reader(filename)) { }
@@ -372,14 +382,14 @@ namespace RSDKv4
 
         public GameConfig(Reader reader)
         {
-            read(reader);
+            Read(reader);
         }
 
-        public override void read(Reader reader)
+        public override void Read(Reader reader)
         {
             // General
-            gameTitle = reader.readRSDKString();
-            gameDescription = reader.readRSDKString();
+            gameTitle = reader.ReadStringRSDK();
+            gameDescription = reader.ReadStringRSDK();
 
             // Palettes
             masterPalette = new Palette(reader, 6);
@@ -390,13 +400,13 @@ namespace RSDKv4
             for (int i = 0; i < objectCount; ++i)
             {
                 ObjectInfo info = new ObjectInfo();
-                info.name = reader.readRSDKString();
+                info.name = reader.ReadStringRSDK();
 
                 objects.Add(info);
             }
 
             foreach (ObjectInfo info in objects)
-                info.script = reader.readRSDKString();
+                info.script = reader.ReadStringRSDK();
 
             // Global Variables
             globalVariables.Clear();
@@ -410,19 +420,19 @@ namespace RSDKv4
             for (int i = 0; i < sfxCount; ++i)
             {
                 SoundInfo info = new SoundInfo();
-                info.name = reader.readRSDKString();
+                info.name = reader.ReadStringRSDK();
 
                 soundFX.Add(info);
             }
 
             foreach (SoundInfo info in soundFX)
-                info.path = reader.readRSDKString();
+                info.path = reader.ReadStringRSDK();
 
             // Players
             players.Clear();
             byte playerCount = reader.ReadByte();
             for (int i = 0; i < playerCount; i++)
-                players.Add(reader.readRSDKString());
+                players.Add(reader.ReadStringRSDK());
 
             // Stages
             stageLists.Clear();
@@ -434,37 +444,37 @@ namespace RSDKv4
             reader.Close();
         }
 
-        public override void write(Writer writer)
+        public override void Write(Writer writer)
         {
             // General
-            writer.writeRSDKString(gameTitle);
-            writer.writeRSDKString(gameDescription);
+            writer.WriteStringRSDK(gameTitle);
+            writer.WriteStringRSDK(gameDescription);
 
             // Palettes
-            masterPalette.write(writer);
+            masterPalette.Write(writer);
 
             // Objects
             writer.Write((byte)objects.Count);
 
             foreach (ObjectInfo info in objects)
-                writer.writeRSDKString(info.name);
+                writer.WriteStringRSDK(info.name);
 
             foreach (ObjectInfo info in objects)
-                writer.writeRSDKString(info.script);
+                writer.WriteStringRSDK(info.script);
 
             // Global Variables
             writer.Write((byte)globalVariables.Count);
             foreach (GlobalVariable variable in globalVariables)
-                variable.write(writer);
+                variable.Write(writer);
 
             // SoundFX
             writer.Write((byte)soundFX.Count);
 
             foreach (SoundInfo info in soundFX)
-                writer.writeRSDKString(info.name);
+                writer.WriteStringRSDK(info.name);
 
             foreach (SoundInfo info in soundFX)
-                writer.writeRSDKString(info.path);
+                writer.WriteStringRSDK(info.path);
 
             // Players
             writer.Write((byte)players.Count);
@@ -473,7 +483,7 @@ namespace RSDKv4
 
             // Stages
             for (int i = 0; i < 4; i++)
-                stageLists[i].write(writer);
+                stageLists[i].Write(writer);
 
             writer.Close();
         }

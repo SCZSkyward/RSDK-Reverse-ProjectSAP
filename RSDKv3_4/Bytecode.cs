@@ -47,7 +47,7 @@ namespace RSDKv3_4
             public DataInfo() { }
         }
 
-        public abstract void write(Writer writer);
+        public abstract void Write(Writer writer);
 
     }
 }
@@ -143,7 +143,7 @@ namespace RSDKv3
             jumpTableLength = jumpTablePos;
         }
 
-        public override void write(Writer writer)
+        public override void Write(Writer writer)
         {
             List<DataInfo> dataInfo = new List<DataInfo>();
 
@@ -355,7 +355,7 @@ namespace RSDKv4
             jumpTableLength = jumpTablePos;
         }
 
-        public override void write(Writer writer)
+        public override void Write(Writer writer)
         {
             List<DataInfo> dataInfo = new List<DataInfo>();
 

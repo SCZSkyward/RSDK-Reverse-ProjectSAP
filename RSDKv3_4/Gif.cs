@@ -10,14 +10,17 @@ namespace RSDKv3_4
         /// the width of the image
         /// </summary>
         public ushort width = 0;
+
         /// <summary>
         /// the height of the image
         /// </summary>
         public ushort height = 0;
+
         /// <summary>
         /// the Image's palette
         /// </summary>
         public Palette.Color[] palette = new Palette.Color[0x100];
+
         /// <summary>
         /// the pixel indices of the image 
         /// </summary>
@@ -35,14 +38,14 @@ namespace RSDKv3_4
 
         public Gif(Reader reader) : this()
         {
-            read(reader);
+            Read(reader);
         }
-        public void read(Reader reader, bool skipHeader = false, int clrCnt = 0x80)
+        public void Read(Reader reader, bool skipHeader = false, int colorCount = 0x80)
         {
             #region Header
             if (!skipHeader)
             {
-                reader.seek(6, System.IO.SeekOrigin.Begin); // GIF89a
+                reader.Seek(6, System.IO.SeekOrigin.Begin); // GIF89a
 
                 width = reader.ReadByte();
                 width |= (ushort)(reader.ReadByte() << 8);
@@ -51,21 +54,25 @@ namespace RSDKv3_4
                 height |= (ushort)(reader.ReadByte() << 8);
 
                 byte info = reader.ReadByte(); // Palette Size
-                clrCnt = (info & 0x7) + 1;
-                if (clrCnt > 0)
-                    clrCnt = 1 << clrCnt;
-                reader.ReadByte(); // background colour index
+                colorCount = (info & 0x7) + 1;
+                if (colorCount > 0)
+                    colorCount = 1 << colorCount;
+                reader.ReadByte(); // background color index
                 reader.ReadByte(); // unused
 
-                if (clrCnt != 0x100)
-                    throw new Exception("RSDK-Formatted Gif files must use 256 colours!");
+                if (colorCount != 0x100)
+                {
+                    // RSDK-formatted GIF files *should* use 256 colors, but they don't *have* to.
+                    Console.WriteLine($"RSDK-Formatted GIF files should use 256 colors!");
+                    // throw new Exception("RSDK-Formatted GIF files must use 256 colors!");
+                }
             }
 
-            for (int c = 0; c < clrCnt; ++c)
+            for (int c = 0; c < colorCount; ++c)
             {
-                palette[c].R = reader.ReadByte();
-                palette[c].G = reader.ReadByte();
-                palette[c].B = reader.ReadByte();
+                palette[c].r = reader.ReadByte();
+                palette[c].g = reader.ReadByte();
+                palette[c].b = reader.ReadByte();
             }
             #endregion
 
@@ -78,6 +85,7 @@ namespace RSDKv3_4
                     default: // Unknown
                         Console.WriteLine($"Unknown Block Type ({blockType})");
                         break;
+
                     case (byte)'!': // Extension
                         {
                             byte extensionType = reader.ReadByte();
@@ -92,6 +100,7 @@ namespace RSDKv3_4
                                         reader.ReadByte(); // terminator
                                     }
                                     break;
+
                                 case 0x01: // Plain Text Extension
                                 case 0xFE: // Comment Extension
                                 case 0xFF: // Application Extension
@@ -105,12 +114,14 @@ namespace RSDKv3_4
                                         }
                                     }
                                     break;
+
                                 default: // Unknown
                                     Console.WriteLine($"Unknown Extension Type ({extensionType})");
                                     return;
                             }
                         }
                         break;
+
                     case (byte)',': // Image descriptor
                         {
                             int left = reader.ReadUInt16();
@@ -124,13 +135,13 @@ namespace RSDKv3_4
                             {
                                 for (int c = 0x80; c < 0x100; ++c)
                                 {
-                                    palette[c].R = reader.ReadByte();
-                                    palette[c].G = reader.ReadByte();
-                                    palette[c].B = reader.ReadByte();
+                                    palette[c].r = reader.ReadByte();
+                                    palette[c].g = reader.ReadByte();
+                                    palette[c].b = reader.ReadByte();
                                 }
                             }
 
-                            readPictureData(width, height, interlaced, reader);
+                            ReadPictureData(width, height, interlaced, reader);
                         }
                         break;
                 }
@@ -144,17 +155,17 @@ namespace RSDKv3_4
         }
 
 
-        public void write(string filename)
+        public void Write(string filename)
         {
-            write(new Writer(filename));
+            Write(new Writer(filename));
         }
 
-        public void write(System.IO.Stream s)
+        public void Write(System.IO.Stream s)
         {
-            write(new Writer(s));
+            Write(new Writer(s));
         }
 
-        public void write(Writer writer, bool skipHeader = false, bool useLocal = false)
+        public void Write(Writer writer, bool skipHeader = false, bool useLocal = false)
         {
             #region Header
             // [GIF HEADER]
@@ -167,9 +178,9 @@ namespace RSDKv3_4
                 writer.Write(height);
 
                 if (useLocal)
-                    writer.Write((byte)((1 << 7) | (6 << 4) | 6)); // 1 == hasColours, 6 == paletteSize of 128, 6 == 7bpp
+                    writer.Write((byte)((1 << 7) | (6 << 4) | 6)); // 1 == hasColors, 6 == paletteSize of 128, 6 == 7bpp
                 else
-                    writer.Write((byte)((1 << 7) | (7 << 4) | 7)); // 1 == hasColours, 7 == paletteSize of 256, 7 == 8bpp
+                    writer.Write((byte)((1 << 7) | (7 << 4) | 7)); // 1 == hasColors, 7 == paletteSize of 256, 7 == 8bpp
                 writer.Write((byte)0);
                 writer.Write((byte)0);
             }
@@ -177,9 +188,9 @@ namespace RSDKv3_4
             // [GLOBAL PALETTE]
             for (int c = 0; c < (useLocal ? 0x80 : 0x100); ++c)
             {
-                writer.Write(palette[c].R);
-                writer.Write(palette[c].G);
-                writer.Write(palette[c].B);
+                writer.Write(palette[c].r);
+                writer.Write(palette[c].g);
+                writer.Write(palette[c].b);
             }
             #endregion
 
@@ -205,14 +216,14 @@ namespace RSDKv3_4
             {
                 for (int c = 0x80; c < 0x100; ++c)
                 {
-                    writer.Write(palette[c].R);
-                    writer.Write(palette[c].G);
-                    writer.Write(palette[c].B);
+                    writer.Write(palette[c].r);
+                    writer.Write(palette[c].g);
+                    writer.Write(palette[c].b);
                 }
             }
 
             // [IMAGE DATA]
-            writePictureData(width, height, false, useLocal ? (byte)7 : (byte)8, writer);
+            WritePictureData(width, height, false, useLocal ? (byte)7 : (byte)8, writer);
 
             // [BLOCK END MARKER]
             writer.Write(';'); // ';' used for image descriptor, 0 would be used for other blocks
@@ -221,7 +232,7 @@ namespace RSDKv3_4
             writer.Close();
         }
 
-        public System.Drawing.Image toImage()
+        public System.Drawing.Image ToImage()
         {
             // Create image
             System.Drawing.Bitmap img = new System.Drawing.Bitmap(width, height, System.Drawing.Imaging.PixelFormat.Format8bppIndexed);
@@ -229,7 +240,7 @@ namespace RSDKv3_4
             System.Drawing.Imaging.ColorPalette cpal = img.Palette;
 
             for (int i = 0; i < 0x100; i++)
-                cpal.Entries[i] = System.Drawing.Color.FromArgb(255, palette[i].R, palette[i].G, palette[i].B);
+                cpal.Entries[i] = System.Drawing.Color.FromArgb(255, palette[i].r, palette[i].g, palette[i].b);
 
             img.Palette = cpal;
 
@@ -241,7 +252,7 @@ namespace RSDKv3_4
             return img;
         }
 
-        public Gfx toGfx()
+        public Gfx ToGfx()
         {
             // Create image
             Gfx img = new Gfx();
@@ -250,13 +261,13 @@ namespace RSDKv3_4
 
             for (int i = 0; i < 0xFF; i++)
             {
-                img.palette[i].R = palette[i].R;
-                img.palette[i].G = palette[i].G;
-                img.palette[i].B = palette[i].B;
+                img.palette[i].r = palette[i].r;
+                img.palette[i].g = palette[i].g;
+                img.palette[i].b = palette[i].b;
             }
-            img.palette[0xFF].R = 0xFF;
-            img.palette[0xFF].G = 0x00;
-            img.palette[0xFF].B = 0xFF;
+            img.palette[0xFF].r = 0xFF;
+            img.palette[0xFF].g = 0x00;
+            img.palette[0xFF].b = 0xFF;
 
             img.pixels = new byte[width * height];
             Array.Copy(pixels, img.pixels, pixels.Length);
@@ -264,18 +275,18 @@ namespace RSDKv3_4
             return img;
         }
 
-        public Bitmap toBitmap()
+        public Bitmap ToBitmap()
         {
             // Create image
             Bitmap img = new Bitmap();
             img.width = width;
             img.height = height;
 
-            for (int i = 0; i < 0x100; i++)
+            for (int c = 0; c < 0x100; c++)
             {
-                img.palette[i].R = palette[i].R;
-                img.palette[i].G = palette[i].G;
-                img.palette[i].B = palette[i].B;
+                img.palette[c].r = palette[c].r;
+                img.palette[c].g = palette[c].g;
+                img.palette[c].b = palette[c].b;
             }
 
             img.pixels = new byte[width * height];
@@ -284,17 +295,17 @@ namespace RSDKv3_4
             return img;
         }
 
-        public void fromImage(System.Drawing.Bitmap img)
+        public void FromImage(System.Drawing.Bitmap img)
         {
             // Create image
             width = (ushort)img.Width;
             height = (ushort)img.Height;
 
-            for (int i = 0; i < 0x100; i++)
+            for (int c = 0; c < 0x100; c++)
             {
-                palette[i].R = img.Palette.Entries[i].R;
-                palette[i].G = img.Palette.Entries[i].G;
-                palette[i].B = img.Palette.Entries[i].B;
+                palette[c].r = img.Palette.Entries[c].R;
+                palette[c].g = img.Palette.Entries[c].G;
+                palette[c].b = img.Palette.Entries[c].B;
             }
             pixels = new byte[width * height];
 
@@ -303,27 +314,27 @@ namespace RSDKv3_4
             img.UnlockBits(imgData);
         }
 
-        public void fromImage(Gfx img)
+        public void FromImage(Gfx img)
         {
             // Create image
             width = img.width;
             height = img.height;
 
-            for (int i = 0; i < 0xFF; i++)
+            for (int c = 0; c < 0xFF; c++)
             {
-                palette[i].R = img.palette[i].R;
-                palette[i].G = img.palette[i].G;
-                palette[i].B = img.palette[i].B;
+                palette[c].r = img.palette[c].r;
+                palette[c].g = img.palette[c].g;
+                palette[c].b = img.palette[c].b;
             }
-            palette[0xFF].R = 0xFF;
-            palette[0xFF].G = 0x00;
-            palette[0xFF].B = 0xFF;
+            palette[0xFF].r = 0xFF;
+            palette[0xFF].g = 0x00;
+            palette[0xFF].b = 0xFF;
 
             pixels = new byte[width * height];
             Array.Copy(img.pixels, pixels, pixels.Length);
         }
 
-        public void fromImage(Bitmap img)
+        public void FromImage(Bitmap img)
         {
             // Create image
             width = (ushort)img.width;
@@ -331,9 +342,9 @@ namespace RSDKv3_4
 
             for (int i = 0; i < 0x100; i++)
             {
-                palette[i].R = img.palette[i].R;
-                palette[i].G = img.palette[i].G;
-                palette[i].B = img.palette[i].B;
+                palette[i].r = img.palette[i].r;
+                palette[i].g = img.palette[i].g;
+                palette[i].b = img.palette[i].b;
             }
 
             pixels = new byte[width * height];
@@ -393,14 +404,14 @@ namespace RSDKv3_4
             public uint[] hashTable = new uint[HT_SIZE];
         };
 
-        private int[] codeMasks = { 0, 1, 3, 7, 15, 31, 63, 127, 255, 511, 1023, 2047, 4095 };
+        private int[] codeMasks = { 0x00, 0x01, 0x03, 0x07, 0x0F, 0x1F, 0x3F, 0x7F, 0xFF, 0x1FF, 0x3FF, 0x7FF, 0xFFF };
 
         private Decoder decoder = new Decoder();
         private Encoder encoder = new Encoder();
         #endregion
 
         #region DECODING
-        private void initDecoder(Reader reader)
+        private void InitDecoder(Reader reader)
         {
             byte initCodeSize = reader.ReadByte();
             decoder.fileState = PARSING_IMAGE;
@@ -419,7 +430,7 @@ namespace RSDKv3_4
             decoder.shiftData = 0;
             for (int i = 0; i <= LZ_MAX_CODE; ++i) decoder.prefix[i] = NO_SUCH_CODE;
         }
-        private void readLine(Reader reader, int length, int offset)
+        private void ReadLine(Reader reader, int length, int offset)
         {
             int i = 0;
             int stackPtr = decoder.stackPtr;
@@ -440,7 +451,7 @@ namespace RSDKv3_4
 
             while (i < length)
             {
-                int gifCode = readCode(reader);
+                int gifCode = ReadCode(reader);
                 if (gifCode == eofCode)
                 {
                     if (i != length - 1 || decoder.pixelCount != 0)
@@ -480,7 +491,7 @@ namespace RSDKv3_4
                                     return;
 
                                 code = prevCode;
-                                decoder.suffix[decoder.runningCode - 2] = decoder.stack[stackPtr++] = tracePrefix(prevCode, clearCode);
+                                decoder.suffix[decoder.runningCode - 2] = decoder.stack[stackPtr++] = TracePrefix(prevCode, clearCode);
                             }
                             else
                             {
@@ -507,9 +518,9 @@ namespace RSDKv3_4
 
                             decoder.prefix[decoder.runningCode - 2] = (uint)prevCode;
                             if (gifCode == decoder.runningCode - 2)
-                                decoder.suffix[decoder.runningCode - 2] = tracePrefix(prevCode, clearCode);
+                                decoder.suffix[decoder.runningCode - 2] = TracePrefix(prevCode, clearCode);
                             else
-                                decoder.suffix[decoder.runningCode - 2] = tracePrefix(gifCode, clearCode);
+                                decoder.suffix[decoder.runningCode - 2] = TracePrefix(gifCode, clearCode);
                         }
                         prevCode = gifCode;
                     }
@@ -519,11 +530,11 @@ namespace RSDKv3_4
             decoder.stackPtr = stackPtr;
         }
 
-        private int readCode(Reader reader)
+        private int ReadCode(Reader reader)
         {
             while (decoder.shiftState < decoder.runningBits)
             {
-                byte b = readByte(reader);
+                byte b = ReadByte(reader);
                 decoder.shiftData |= (uint)b << decoder.shiftState;
                 decoder.shiftState += 8;
             }
@@ -538,7 +549,7 @@ namespace RSDKv3_4
             return result;
         }
 
-        private byte readByte(Reader reader)
+        private byte ReadByte(Reader reader)
         {
             byte c = 0;
             if (decoder.fileState == PARSE_COMPLETE)
@@ -554,7 +565,7 @@ namespace RSDKv3_4
                     decoder.fileState = PARSE_COMPLETE;
                     return c;
                 }
-                decoder.buffer = reader.readBytes(decoder.bufferSize);
+                decoder.buffer = reader.ReadBytes(decoder.bufferSize);
                 b = decoder.buffer[0];
                 decoder.position = 1;
             }
@@ -565,18 +576,19 @@ namespace RSDKv3_4
             return b;
         }
 
-        private byte tracePrefix(int code, int clearCode)
+        private byte TracePrefix(int code, int clearCode)
         {
             int i = 0;
             while (code > clearCode && i++ <= LZ_MAX_CODE) code = (int)decoder.prefix[code];
 
             return (byte)code;
         }
-        private void readPictureData(int width, int height, bool interlaced, Reader reader)
+
+        private void ReadPictureData(int width, int height, bool interlaced, Reader reader)
         {
             pixels = new byte[width * height];
 
-            initDecoder(reader);
+            InitDecoder(reader);
             if (interlaced)
             {
                 int[] initialRows = { 0, 4, 2, 1 };
@@ -584,19 +596,19 @@ namespace RSDKv3_4
                 for (int p = 0; p < 4; ++p)
                 {
                     for (int y = initialRows[p]; y < height; y += rowInc[p])
-                        readLine(reader, width, y * width);
+                        ReadLine(reader, width, y * width);
                 }
             }
             else
             {
-                for (int h = 0; h < height; ++h) readLine(reader, width, h * width);
+                for (int h = 0; h < height; ++h) ReadLine(reader, width, h * width);
             }
         }
         #endregion
 
         #region ENCODING
 
-        private void insertHashTable(uint key, int code)
+        private void InsertHashTable(uint key, int code)
         {
             uint hKey = ((key >> 12) ^ key) & HT_KEY_MASK;
 
@@ -606,7 +618,7 @@ namespace RSDKv3_4
             encoder.hashTable[hKey] = (uint)((key << 12) | (code & 0x0FFF));
         }
 
-        private int existsHashTable(uint key)
+        private int ExistsHashTable(uint key)
         {
             uint hKey = ((key >> 12) ^ key) & HT_KEY_MASK;
             uint tableKey = 0;
@@ -621,7 +633,7 @@ namespace RSDKv3_4
             return -1;
         }
 
-        private void initEncoder(Writer writer, byte bitsPerPixel)
+        private void InitEncoder(Writer writer, byte bitsPerPixel)
         {
             byte initCodeSize = bitsPerPixel < 2 ? (byte)2 : bitsPerPixel;
             writer.Write(initCodeSize);
@@ -640,10 +652,10 @@ namespace RSDKv3_4
             encoder.shiftData = 0;
             for (int i = 0; i < HT_SIZE; ++i) encoder.hashTable[i] = 0xFFFFFFFF;
 
-            writeCode(writer, encoder.clearCode);
+            WriteCode(writer, encoder.clearCode);
         }
 
-        private void writeByte(Writer writer, int b, bool flush = false)
+        private void WriteByte(Writer writer, int b, bool flush = false)
         {
             if (flush)
             {
@@ -665,20 +677,20 @@ namespace RSDKv3_4
             }
         }
 
-        private void writeCode(Writer writer, int code, bool flush = false)
+        private void WriteCode(Writer writer, int code, bool flush = false)
         {
             if (flush)
             {
                 // write remaining data
                 while (encoder.shiftState > 0)
                 {
-                    writeByte(writer, (int)(encoder.shiftData & 0xFF));
+                    WriteByte(writer, (int)(encoder.shiftData & 0xFF));
                     encoder.shiftData >>= 8;
                     encoder.shiftState -= 8;
                 }
                 //clear & reset
                 encoder.shiftState = 0;
-                writeByte(writer, 0, true);
+                WriteByte(writer, 0, true);
             }
             else
             {
@@ -688,7 +700,7 @@ namespace RSDKv3_4
                 // write any full bytes we have
                 while (encoder.shiftState >= 8)
                 {
-                    writeByte(writer, (int)(encoder.shiftData & 0xFF));
+                    WriteByte(writer, (int)(encoder.shiftData & 0xFF));
                     encoder.shiftData >>= 8;
                     encoder.shiftState -= 8;
                 }
@@ -699,7 +711,7 @@ namespace RSDKv3_4
                 encoder.maxCodePlusOne = 1 << ++encoder.runningBits;
         }
 
-        private void writeLine(Writer writer, byte[] line)
+        private void WriteLine(Writer writer, byte[] line)
         {
             int mask = codeMasks[encoder.depth];
             for (int l = 0; l < line.Length; l++)
@@ -718,19 +730,19 @@ namespace RSDKv3_4
                 // create a key based on our code & the next pixel
                 int newCode = 0;
                 uint newKey = (((uint)curCode) << 8) + pixel;
-                if ((newCode = existsHashTable(newKey)) >= 0)
+                if ((newCode = ExistsHashTable(newKey)) >= 0)
                 {
                     curCode = newCode;
                 }
                 else
                 {
-                    writeCode(writer, curCode);
+                    WriteCode(writer, curCode);
                     curCode = pixel;
 
                     // handle clear codes if the hash table is full
                     if (encoder.runningCode >= LZ_MAX_CODE)
                     {
-                        writeCode(writer, encoder.clearCode);
+                        WriteCode(writer, encoder.clearCode);
                         encoder.runningCode = encoder.eofCode + 1;
                         encoder.runningBits = encoder.depth + 1;
                         encoder.maxCodePlusOne = 1 << encoder.runningBits;
@@ -741,7 +753,7 @@ namespace RSDKv3_4
                     else
                     {
                         // add this to the hash table
-                        insertHashTable(newKey, encoder.runningCode++);
+                        InsertHashTable(newKey, encoder.runningCode++);
                     }
                 }
 
@@ -751,9 +763,9 @@ namespace RSDKv3_4
             encoder.currentCode = curCode;
         }
 
-        private void writePictureData(int width, int height, bool interlaced, byte bitsPerPixel, Writer writer)
+        private void WritePictureData(int width, int height, bool interlaced, byte bitsPerPixel, Writer writer)
         {
-            initEncoder(writer, bitsPerPixel);
+            InitEncoder(writer, bitsPerPixel);
 
             if (interlaced)
             {
@@ -762,18 +774,18 @@ namespace RSDKv3_4
                 for (int p = 0; p < 4; ++p)
                 {
                     for (int y = initialRows[p]; y < height; y += rowInc[p])
-                        writeLine(writer, pixels.Skip(y * width).Take(width).ToArray());
+                        WriteLine(writer, pixels.Skip(y * width).Take(width).ToArray());
                 }
             }
             else
             {
-                for (int y = 0; y < height; ++y) writeLine(writer, pixels.Skip(y * width).Take(width).ToArray());
+                for (int y = 0; y < height; ++y) WriteLine(writer, pixels.Skip(y * width).Take(width).ToArray());
             }
 
             // write extra data
-            writeCode(writer, encoder.currentCode);
-            writeCode(writer, encoder.eofCode);
-            writeCode(writer, 0, true);
+            WriteCode(writer, encoder.currentCode);
+            WriteCode(writer, encoder.eofCode);
+            WriteCode(writer, 0, true);
 
             writer.Write((byte)0); //block terminator
 

@@ -45,9 +45,9 @@ namespace RSDKv3_4
                 set { ypos = (int)(value / 65536); }
             }
 
-            public abstract void read(Reader reader);
+            public abstract void Read(Reader reader);
 
-            public abstract void write(Writer writer);
+            public abstract void Write(Writer writer);
 
         }
 
@@ -123,21 +123,21 @@ namespace RSDKv3_4
         /// </summary>
         public const int ENTITY_LIST_SIZE = 1024;
 
-        public abstract void read(Reader reader);
+        public abstract void Read(Reader reader);
 
-        public void write(string filename)
+        public void Write(string filename)
         {
             using (Writer writer = new Writer(filename))
-                write(writer);
+                Write(writer);
         }
 
-        public void write(System.IO.Stream stream)
+        public void Write(System.IO.Stream stream)
         {
             using (Writer writer = new Writer(stream))
-                write(writer);
+                Write(writer);
         }
 
-        public abstract void write(Writer writer);
+        public abstract void Write(Writer writer);
 
         /// <summary>
         /// Resizes a layer.
@@ -198,10 +198,10 @@ namespace RSDKv3
 
             public Entity(Reader reader) : this()
             {
-                read(reader);
+                Read(reader);
             }
 
-            public override void read(Reader reader)
+            public override void Read(Reader reader)
             {
                 // entity type, 1 byte, unsigned
                 type = reader.ReadByte();
@@ -219,7 +219,7 @@ namespace RSDKv3
                 ypos <<= 16;
             }
 
-            public override void write(Writer writer)
+            public override void Write(Writer writer)
             {
                 writer.Write(type);
                 writer.Write(propertyValue);
@@ -249,12 +249,12 @@ namespace RSDKv3
 
         public Scene(Reader reader)
         {
-            read(reader);
+            Read(reader);
         }
 
-        public override void read(Reader reader)
+        public override void Read(Reader reader)
         {
-            title = reader.readRSDKString();
+            title = reader.ReadStringRSDK();
 
             activeLayer0 = (ActiveLayers)reader.ReadByte();
             activeLayer1 = (ActiveLayers)reader.ReadByte();
@@ -288,7 +288,7 @@ namespace RSDKv3
 
             objectTypeNames.Clear();
             for (int n = 0; n < objectTypeCount; n++)
-                objectTypeNames.Add(reader.readRSDKString());
+                objectTypeNames.Add(reader.ReadStringRSDK());
 
             // Read entities
 
@@ -302,10 +302,10 @@ namespace RSDKv3
             reader.Close();
         }
 
-        public override void write(Writer writer)
+        public override void Write(Writer writer)
         {
             // Write zone name		
-            writer.writeRSDKString(title);
+            writer.WriteStringRSDK(title);
 
             // Write the active layers & midpoint
             writer.Write((byte)activeLayer0);
@@ -334,7 +334,7 @@ namespace RSDKv3
             // Write object type names
             // Ignore first object type (Blank Object), it is not stored.
             foreach (string typeName in objectTypeNames)
-                writer.writeRSDKString(typeName);
+                writer.WriteStringRSDK(typeName);
 
             // Write number of entities
             writer.Write((byte)(entities.Count >> 8));
@@ -342,7 +342,7 @@ namespace RSDKv3
 
             // Write entities
             foreach (Entity entity in entities)
-                entity.write(writer);
+                entity.Write(writer);
 
             writer.Close();
         }
@@ -390,10 +390,10 @@ namespace RSDKv4
 
             public Entity(Reader reader)
             {
-                read(reader);
+                Read(reader);
             }
 
-            public override void read(Reader reader)
+            public override void Read(Reader reader)
             {
                 //Variable flags, 2 bytes, unsigned
                 ushort flags = reader.ReadUInt16();
@@ -470,7 +470,7 @@ namespace RSDKv4
                     value3 = null;
             }
 
-            public override void write(Writer writer)
+            public override void Write(Writer writer)
             {
                 int flags = 0;
                 if (state.HasValue)
@@ -557,12 +557,12 @@ namespace RSDKv4
 
         public Scene(Reader reader)
         {
-            read(reader);
+            Read(reader);
         }
 
-        public override void read(Reader reader)
+        public override void Read(Reader reader)
         {
-            title = reader.readRSDKString();
+            title = reader.ReadStringRSDK();
 
             activeLayer0  = (ActiveLayers)reader.ReadByte();
             activeLayer1  = (ActiveLayers)reader.ReadByte();
@@ -607,10 +607,10 @@ namespace RSDKv4
             reader.Close();
         }
 
-        public override void write(Writer writer)
+        public override void Write(Writer writer)
         {
             // Write zone name		
-            writer.writeRSDKString(title);
+            writer.WriteStringRSDK(title);
 
             // Write the active layers & midpoint
             writer.Write((byte)activeLayer0);
@@ -644,7 +644,7 @@ namespace RSDKv4
 
             // Write entities
             foreach (Entity entity in entities)
-                entity.write(writer);
+                entity.Write(writer);
 
             writer.Close();
 
