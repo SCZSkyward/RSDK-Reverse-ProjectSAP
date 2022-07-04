@@ -100,6 +100,14 @@ namespace RSDKv3_4
             public abstract void Write(Writer writer);
         }
 
+        public class SoundInfo
+        {
+            public SoundInfo() { }
+
+            public string name = "Sound";
+            public string path = "Folder/Sound.wav";
+        };
+
         public class ObjectInfo
         {
             public ObjectInfo() { }
@@ -125,6 +133,10 @@ namespace RSDKv3_4
         /// the list of global variable names and values
         /// </summary>
         public List<GlobalVariable> globalVariables = new List<GlobalVariable>();
+        /// <summary>
+        /// the list of global SoundFX
+        /// </summary>
+        public List<SoundInfo> soundFX = new List<SoundInfo>();
         /// <summary>
         /// the list of player names
         /// </summary>
@@ -196,11 +208,6 @@ namespace RSDKv3
         /// </summary>
         private string unknown = "Data";
 
-        /// <summary>
-        /// the list of global SoundFX paths
-        /// </summary>
-        public List<string> soundFX = new List<string>();
-
         public GameConfig()
         {
             stageLists.Add(new StageList()); //Presentation Stages
@@ -248,10 +255,14 @@ namespace RSDKv3
             soundFX.Clear();
             byte sfxCount = reader.ReadByte();
             for (int i = 0; i < sfxCount; ++i)
-                soundFX.Add(reader.ReadStringRSDK());
+			{
+				SoundInfo item = new SoundInfo() { path = reader.ReadStringRSDK() };
+                item.name = System.IO.Path.GetFileNameWithoutExtension(item.path);
+				soundFX.Add(item);
+			}
 
-            // Players
-            players.Clear();
+			// Players
+			players.Clear();
             byte playerCount = reader.ReadByte();
             for (int i = 0; i < playerCount; i++)
                 players.Add(reader.ReadStringRSDK());
@@ -290,8 +301,8 @@ namespace RSDKv3
             // SoundFX
             writer.Write((byte)soundFX.Count);
 
-            foreach (string sfx in soundFX)
-                writer.WriteStringRSDK(sfx);
+            foreach (SoundInfo sfx in soundFX)
+                writer.WriteStringRSDK(sfx.path);
 
             // Players
             writer.Write((byte)players.Count);
@@ -346,27 +357,10 @@ namespace RSDKv4
             }
         }
 
-        public class SoundInfo
-        {
-            public SoundInfo() { }
-
-            public string name = "Sound";
-            public string path = "Folder/Sound.wav";
-        };
-
         /// <summary>
-
         /// a set of colors to be used as the masterpalette
         /// </summary>
         public Palette masterPalette = new Palette();
-
-        /// <summary>
-
-        /// the list of global SoundFX
-        /// </summary>
-        public List<SoundInfo> soundFX = new List<SoundInfo>();
-
-
 
 
         public GameConfig()

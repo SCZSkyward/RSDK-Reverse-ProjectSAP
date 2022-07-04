@@ -11,6 +11,11 @@ namespace RSDKv3_4
         public Palette stagePalette = new Palette();
 
         /// <summary>
+        /// the list of stage-specific SoundFX
+        /// </summary>
+        public List<GameConfig.SoundInfo> soundFX = new List<GameConfig.SoundInfo>();
+
+        /// <summary>
         /// the list of stage-specific objects
         /// </summary>
         public List<GameConfig.ObjectInfo> objects = new List<GameConfig.ObjectInfo>();
@@ -44,11 +49,6 @@ namespace RSDKv3
 {
     public class StageConfig : RSDKv3_4.StageConfig
     {
-        /// <summary>
-        /// the list of stage-specific SoundFX paths
-        /// </summary>
-        public List<string> soundFX = new List<string>();
-
         public StageConfig() { }
 
         public StageConfig(string filename) : this(new Reader(filename)) { }
@@ -86,7 +86,11 @@ namespace RSDKv3
             soundFX.Clear();
             byte sfxCount = reader.ReadByte();
             for (int i = 0; i < sfxCount; ++i)
-                soundFX.Add(reader.ReadStringRSDK());
+            {
+				RSDKv3_4.GameConfig.SoundInfo item = new RSDKv3_4.GameConfig.SoundInfo() { path = reader.ReadStringRSDK() };
+                item.name = System.IO.Path.GetFileNameWithoutExtension(item.path);
+                soundFX.Add(item);
+            }
 
             reader.Close();
         }
@@ -111,8 +115,8 @@ namespace RSDKv3
             // SoundFX
             writer.Write((byte)soundFX.Count);
 
-            foreach (string path in soundFX)
-                writer.WriteStringRSDK(path);
+            foreach (var path in soundFX)
+                writer.WriteStringRSDK(path.path);
 
             writer.Close();
 
@@ -125,11 +129,6 @@ namespace RSDKv4
 {
     public class StageConfig : RSDKv3_4.StageConfig
     {
-        /// <summary>
-        /// the list of stage-specific SoundFX
-        /// </summary>
-        public List<GameConfig.SoundInfo> soundFX = new List<GameConfig.SoundInfo>();
-
         public StageConfig() { }
 
         public StageConfig(string filename) : this(new Reader(filename)) { }
