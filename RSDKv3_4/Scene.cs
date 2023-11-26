@@ -296,6 +296,7 @@ namespace RSDKv3
             int entityCount = reader.ReadByte() << 8;
             entityCount |= reader.ReadByte();
 
+            entities.Clear();
             for (int n = 0; n < entityCount; n++)
                 entities.Add(new Entity(reader));
 
