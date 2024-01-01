@@ -359,7 +359,7 @@ namespace RSDKv4
         {
             public enum InkEffects { None, Blend, Alpha, Add, Sub }
 
-            public enum Priorities { ActiveBounds, Active, ActivePaused, XBounds, XBoundsDestroy, Inactive, BoundsSmall, Unknown }
+            public enum Priorities { Bounds, Active, Always, XBounds, XBoundsDestroy, Inactive, BoundsSmall, ActiveSmall }
 
             public int? state;
             public Tiles128x128.Block.Tile.Directions? direction;
