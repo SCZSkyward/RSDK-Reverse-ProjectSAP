@@ -101,6 +101,10 @@ namespace RSDKv3_4
             }
         }
 
+        public Palette(string filename) : this(new Reader(filename)) { }
+
+        public Palette(string filename, int rows = 2) : this(new Reader(filename), rows) { }
+
         public Palette(Reader r)
         {
             Read(r, 2);
