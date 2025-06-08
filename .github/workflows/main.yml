@@ -21,15 +21,15 @@ jobs:
          with:
            name: RSDK-Reverse-ProjectSAP
            path: artifacts
-       - name: Push DLL to SonLVL-ProjectSAP/
-         uses: nkoppel/push-files-to-another-repository@v1.1.4
-         env:
-            API_TOKEN_GITHUB: ${{ secrets.API_TOKEN_GITHUB }}
-            EMAIL: ${{ secrets.EMAIL }}
+       - name: Push DLL to SonLVL-ProjectSAP
+         uses: GuillaumeFalourd/copy-push-files@v1
          with:
-             source-files: './artifacts'
-             destination-username: 'SCZSkyward'
-             destination-repository: 'SonLVL-ProjectSAP'
-             destination-directory: './Dependencies/'
-             commit-email: EMAIL
+             email: ${{ github.actor }}[bot]@users.noreply.github.com
+             name: ${{ github.actor }}
+             commit_message: Move DLL to SonLVL-ProjectSAP
+             target_branch: master
+             source_files: ./artifacts
+             remote_repository: https://github.com/SCZSkyward/SonLVL-ProjectSAP
+             access_token: ${{ secrets.ACCESS_TOKEN }}
+             target_dir: ./Dependencies
            
