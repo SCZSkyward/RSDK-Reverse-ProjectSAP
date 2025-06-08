@@ -24,11 +24,11 @@ jobs:
        - name: Push DLL to SonLVL-ProjectSAP
          uses: GuillaumeFalourd/copy-push-files@v1
          with:
-             email: ${{ github.actor }}[bot]@users.noreply.github.com
+             email: ${{ github.actor }}@users.noreply.github.com
              name: ${{ github.actor }}
              commit_message: Move DLL to SonLVL-ProjectSAP
              target_branch: master
-             source_files: ./artifacts
+             source_files: ./artifacts/RSDKv3_4.dll
              remote_repository: https://github.com/SCZSkyward/SonLVL-ProjectSAP
              access_token: ${{ secrets.ACCESS_TOKEN }}
              target_dir: ./Dependencies
