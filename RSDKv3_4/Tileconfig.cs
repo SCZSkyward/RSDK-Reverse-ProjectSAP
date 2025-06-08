@@ -128,8 +128,8 @@
         {
             for (int p = 0; p < 2; ++p)
             {
-                collisionMasks[p] = new CollisionMask[0x800];
-                for (int i = 0; i < 0x800; ++i)
+                collisionMasks[p] = new CollisionMask[0x400];
+                for (int i = 0; i < 0x400; ++i)
                     collisionMasks[p][i] = new CollisionMask();
             }
         }
@@ -146,12 +146,12 @@
         {
             for (int p = 0; p < 2; ++p)
             {
-                collisionMasks[p] = new CollisionMask[0x800];
-                for (int c = 0; c < 0x800; ++c)
+                collisionMasks[p] = new CollisionMask[0x400];
+                for (int c = 0; c < 0x400; ++c)
                     collisionMasks[p][c] = new CollisionMask();
             }
 
-            for (int c = 0; c < 0x800; ++c)
+            for (int c = 0; c < 0x400; ++c)
             {
                 collisionMasks[0][c].Read(reader);
                 collisionMasks[1][c].Read(reader);
@@ -171,7 +171,7 @@
 
         public void Write(Writer writer)
         {
-            for (int c = 0; c < 0x800; ++c)
+            for (int c = 0; c < 0x400; ++c)
             {
                 collisionMasks[0][c].Write(writer);
                 collisionMasks[1][c].Write(writer);
