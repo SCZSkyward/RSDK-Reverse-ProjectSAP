@@ -1,0 +1,24 @@
+name: Build RSDK-Reverse-ProjectSAP 
+on: [push, workflow_dispatch]
+jobs:
+   build:
+     runs-on: windows-latest
+     steps:
+       - name: Checkout repository 
+         uses: actions/checkout@v4
+       - name: Setup MSBuild
+         uses: microsoft/setup-msbuild@v2
+       - name: Build
+         run: |
+           choco install dotnet4.6.1-devpack
+           msbuild "RSDK Reverse.sln" /p:Configuration=Release
+       - name: Move artifacts
+         run: |
+           mkdir artifacts
+           Move-Item -Path "./build/RSDKv3_4.dll" -Destination "./artifacts" -Exclude "artifacts"
+       - name: Upload artifacts
+         uses: actions/upload-artifact@v4
+         with:
+           name: RSDK-Reverse-ProjectSAP
+           path: artifacts
+           
