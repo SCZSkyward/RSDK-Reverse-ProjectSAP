@@ -136,7 +136,7 @@
         /// <summary>
         /// the list of chunks in the file
         /// </summary>
-        public Block[] chunkList = new Block[512];
+        public Block[] chunkList = new Block[1024];
 
         public Tiles128x128()
         {
@@ -155,7 +155,7 @@
 
         public void Read(Reader reader)
         {
-            for (int c = 0; c < 512; c++)
+            for (int c = 0; c < 1024; c++)
                 chunkList[c].Read(reader);
 
             reader.Close();
@@ -175,7 +175,7 @@
 
         public void Write(Writer writer)
         {
-            for (int c = 0; c < 512; c++)
+            for (int c = 0; c < 1024; c++)
                 chunkList[c].Write(writer);
 
             writer.Close();
